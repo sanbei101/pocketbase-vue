@@ -3,7 +3,7 @@
         <n-space style="display: flex; align-items: center">
             <n-breadcrumb>
                 <n-breadcrumb-item :clickable="false">Collection</n-breadcrumb-item>
-                <n-breadcrumb-item :clickable="true">User</n-breadcrumb-item>
+                <n-breadcrumb-item :clickable="true">{{ props.selectedCollection }}</n-breadcrumb-item>
             </n-breadcrumb>
             <n-icon style="display: flex; align-items: center" size="20">
                 <x-icon-settings />
@@ -46,8 +46,14 @@
 </template>
 
 <script setup lang="ts">
-const message = useMessage();
 
+import { NButton, type DataTableColumn } from 'naive-ui'
+import { SettingsOutline as XIconSettings, RocketSharp } from '@vicons/ionicons5';
+const props = defineProps<{
+    selectedCollection: string
+}>()
+
+const message = useMessage();
 interface TableRecord {
     id: number;
     name: string;
@@ -70,9 +76,6 @@ const handleSubmit = () => {
     });
     message.success('添加成功');
 };
-import { NButton, type DataTableColumn } from 'naive-ui'
-import { SettingsOutline as XIconSettings, RocketSharp } from '@vicons/ionicons5';
-
 const pageNation = {
     pageSize: 10,
 };
