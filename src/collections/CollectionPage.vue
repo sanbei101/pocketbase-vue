@@ -15,7 +15,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import CollectionMenu from '@/collections/CollectionMenu.vue'
 import CollectionRecords from '@/collections/CollectionRecords.vue'
 const collections = ref<string[]>(['Collection', 'User'])

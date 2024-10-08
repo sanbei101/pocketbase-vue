@@ -10,6 +10,7 @@ export default defineConfig({
     AutoImport({
       imports: [
         'vue',
+        'vue-router',
         {
           'naive-ui': ['useDialog', 'useMessage', 'useNotification', 'useLoadingBar']
         }
@@ -24,6 +25,21 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': '/src'
+    }
+  },
+  build: {
+    target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vue-bundle': ['vue'],
+          'naive-ui-bundle': ['naive-ui']
+        },
+        entryFileNames: 'assets/[name].[hash].js',
+        chunkFileNames: 'assets/[name].[hash].js',
+        assetFileNames: 'assets/[name].[hash].[ext]'
+      },
+      external: ['fsevents']
     }
   }
 });
