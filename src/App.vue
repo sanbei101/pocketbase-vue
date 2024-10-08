@@ -39,8 +39,7 @@
 import { ref, h } from 'vue';
 import { type MenuOption, type DataTableColumn, NButton } from 'naive-ui';
 import { HomeOutline, SettingsOutline, Cash } from '@vicons/ionicons5'; // 导入图标
-import AppHeader from './components/AppHeader.vue';
-
+import AppHeader from '@/components/AppHeader.vue';
 const collections = ref<string[]>(['Collection', 'User']);
 // 定义菜单选项
 const menuOptions: MenuOption[] = [

@@ -20,5 +20,10 @@ export default defineConfig({
       resolvers: [NaiveUiResolver()],
       dts: 'src/components.d.ts'
     })
-  ]
+  ],
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  }
 });
