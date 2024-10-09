@@ -14,22 +14,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-        
-    - name: install pnpm
-      run: npm i -g pnpm
-      
-    - name: Install dependencies
-      run: pnpm install && pnpm dev
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
 
-    - name: build 
-      run: pnpm build
+      - name: install pnpm
+        run: npm i -g pnpm
 
-    - name: echo dist size
-      run: du -sh ./dist/*
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: build
+        run: pnpm build
+
+      - name: echo dist size
+        run: du -sh ./dist/*
