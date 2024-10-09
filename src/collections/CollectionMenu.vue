@@ -28,7 +28,7 @@
     <n-drawer v-model:show="showAddCollectionDrawer" :width="600">
       <n-drawer-content title="Add Collection">
         <n-form @submit.prevent="submitAddCollection">
-          <n-input v-model:value="Newcollection.collectionName" placeholder="Collection Name" size="large" />
+          <n-input v-model:value="newCollection.collectionName" placeholder="Collection Name" size="large" />
           <n-divider />
           <div v-for="(field, index) in CollectionFileds" :key="index" style="margin-top: 1rem">
             <n-input v-model:value="field.filed_name" :placeholder="field.filed_type" />
@@ -61,29 +61,19 @@ const props = defineProps<{
 }>();
 const emit = defineEmits(['select']);
 
-// 处理点击事件
-const selectCollection = (collection: string) => {
-  emit('select', collection);
+type newCollection = {
+  collectionName: string;
+  collectionFields: { filed_type: string; filed_name: string }[];
 };
+const newCollection = ref<newCollection>({
+  collectionName: '',
+  collectionFields: []
+});
 
 const showAddCollectionDrawer = ref<boolean>(false);
 
-const submitAddCollection = () => {
-  console.log('submit add collection');
-};
-
-interface CollectionType {
-  collectionName: string;
-}
-
-const Newcollection = ref<CollectionType>({
-  collectionName: ''
-});
-
-// 存储动态添加的输入框
 const CollectionFileds = ref<{ filed_type: string; filed_name: string }[]>([]);
 
-// 字段选项
 const CollectionFiledOptions = [
   {
     label: 'Text',
@@ -98,6 +88,15 @@ const CollectionFiledOptions = [
     key: 'bool'
   }
 ];
+
+const selectCollection = (collection: string) => {
+  emit('select', collection);
+};
+
+const submitAddCollection = () => {
+  console.log('submit add collection');
+};
+
 const addField = (key: string) => {
   const filed_type = key;
   CollectionFileds.value.push({ filed_type, filed_name: '' });
