@@ -23,7 +23,5 @@ dist-ssr
 *.sln
 *.sw?
 .vscode
-components.d.ts
-auto-imports.d.ts
 tsconfig.node.tsbuildinfo
 tsconfig.app.tsbuildinfo
