@@ -1,30 +1,105 @@
 <template>
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem">
-        <n-input placeholder="search collections.." style="margin: 1rem auto; max-width: 85%" />
-        <div v-for="collection in props.collections" :key="collection">
-            <n-button strong secondary type="tertiary" style="min-width: 80%" @click="selectCollection(collection)">
-                <template #icon>
-                    <n-icon>
-                        <Cash />
-                    </n-icon>
-                </template>
-                {{ collection }}
-            </n-button>
-        </div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem">
+    <n-input placeholder="search collections.." style="margin: 1rem auto; max-width: 85%" />
+
+    <n-divider />
+
+    <div v-for="collection in props.collections" :key="collection">
+      <n-button strong secondary type="tertiary" style="min-width: 80%" @click="selectCollection(collection)">
+        <template #icon>
+          <n-icon>
+            <Cash />
+          </n-icon>
+        </template>
+        {{ collection }}
+      </n-button>
     </div>
+
+    <n-divider />
+    <n-button @click="showAddCollectionDrawer = true">
+      <template #icon>
+        <n-icon>
+          <AddCircleOutline />
+        </n-icon>
+      </template>
+      Add Collection
+    </n-button>
+
+    <n-drawer v-model:show="showAddCollectionDrawer" :width="600">
+      <n-drawer-content title="Add Collection">
+        <n-form @submit.prevent="submitAddCollection">
+          <n-input v-model:value="Newcollection.collectionName" placeholder="Collection Name" size="large" />
+          <n-divider />
+          <div v-for="(field, index) in CollectionFileds" :key="index" style="margin-top: 1rem">
+            <n-input v-model:value="field.filed_name" :placeholder="field.filed_type" />
+          </div>
+        </n-form>
+
+        <!-- 渲染动态添加的输入框 -->
+        <div style="display: flex; justify-content: center; margin-top: 20%">
+          <n-dropdown :options="CollectionFiledOptions" trigger="click" @select="addField">
+            <n-button size="large">Add Field</n-button>
+          </n-dropdown>
+        </div>
+
+        <n-divider />
+
+        <div style="display: flex; justify-content: end; gap: 1rem">
+          <n-button @click="showAddCollectionDrawer = false"> Cancel </n-button>
+          <n-button> Submit </n-button>
+        </div>
+      </n-drawer-content>
+    </n-drawer>
+  </div>
 </template>
 
 <script setup lang="ts">
-import { Cash } from '@vicons/ionicons5'
+import { Cash, AddCircleOutline } from '@vicons/ionicons5';
 
 const props = defineProps<{
-    collections: string[]
-}>()
-// 定义 emits，用于向父组件发送事件
-const emit = defineEmits(['select'])
+  collections: string[];
+}>();
+const emit = defineEmits(['select']);
 
 // 处理点击事件
 const selectCollection = (collection: string) => {
-    emit('select', collection)
+  emit('select', collection);
+};
+
+const showAddCollectionDrawer = ref<boolean>(false);
+
+const submitAddCollection = () => {
+  console.log('submit add collection');
+};
+
+interface CollectionType {
+  collectionName: string;
 }
+
+const Newcollection = ref<CollectionType>({
+  collectionName: ''
+});
+
+// 存储动态添加的输入框
+const CollectionFileds = ref<{ filed_type: string; filed_name: string }[]>([]);
+
+// 字段选项
+const CollectionFiledOptions = [
+  {
+    label: 'Text',
+    key: 'text'
+  },
+  {
+    label: 'Number',
+    key: 'number'
+  },
+  {
+    label: 'Bool',
+    key: 'bool'
+  }
+];
+const addField = (key: string) => {
+  const filed_type = key;
+  CollectionFileds.value.push({ filed_type, filed_name: '' });
+};
 </script>
