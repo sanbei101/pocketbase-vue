@@ -60,10 +60,13 @@ const props = defineProps<{
   collections: string[];
 }>();
 const emit = defineEmits(['select']);
-
+type collectionFields = {
+  filed_type: string;
+  filed_name: string;
+}[];
 type newCollection = {
   collectionName: string;
-  collectionFields: { filed_type: string; filed_name: string }[];
+  collectionFields: collectionFields;
 };
 const newCollection = ref<newCollection>({
   collectionName: '',
@@ -72,7 +75,7 @@ const newCollection = ref<newCollection>({
 
 const showAddCollectionDrawer = ref<boolean>(false);
 
-const CollectionFileds = ref<{ filed_type: string; filed_name: string }[]>([]);
+const CollectionFileds = ref<collectionFields>([]);
 
 const CollectionFiledOptions = [
   {
