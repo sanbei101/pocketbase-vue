@@ -4,8 +4,8 @@
 
     <n-divider />
 
-    <div v-for="collection in MenuCollections" :key="collection.id">
-      <n-button strong secondary type="tertiary" style="min-width: 80%" @click="SelectCollection = collection.name">
+    <div v-for="collection in menuCollections" :key="collection.id">
+      <n-button strong secondary type="tertiary" style="min-width: 80%" @click="selectCollection = collection.name">
         <template #icon>
           <n-icon>
             <Cash />
@@ -30,14 +30,14 @@
         <n-form @submit.prevent="submitAddCollection">
           <n-input v-model:value="newCollection.name" placeholder="Collection Name" size="large" />
           <n-divider />
-          <div v-for="(field, index) in CollectionFileds" :key="index" style="margin-top: 1rem">
+          <div v-for="(field, index) in collectionFields" :key="index" style="margin-top: 1rem">
             <n-input v-model:value="field.field_name" :placeholder="field.field_type" />
           </div>
         </n-form>
 
         <!-- 渲染动态添加的输入框 -->
         <div style="display: flex; justify-content: center; margin-top: 20%">
-          <n-dropdown :options="CollectionFiledOptions" trigger="click" @select="addField">
+          <n-dropdown :options="collectionFieldOptions" trigger="click" @select="addField">
             <n-button size="large">Add Field</n-button>
           </n-dropdown>
         </div>
@@ -57,78 +57,75 @@
 import AxiosInstance from '@/util/axios';
 import { Cash, AddCircleOutline } from '@vicons/ionicons5';
 const message = useMessage();
-// 定义类型
-type collectionFields = {
+
+// 1. 类型定义
+type CollectionField = {
   field_name: string;
   field_type: string;
-}[];
-
-type newCollection = {
-  name: string;
-  fields: collectionFields;
 };
-type MenuCollection = newCollection & {
+
+type NewCollection = {
+  name: string;
+  fields: CollectionField[];
+};
+
+type MenuCollection = NewCollection & {
   id: string;
 };
 
-// 定义响应式变量
-const CollectionFileds = ref<collectionFields>([]);
-const newCollection = ref<newCollection>({
+// 2. 响应式变量定义
+const collectionFields = ref<CollectionField[]>([]);
+const newCollection = ref<NewCollection>({
   name: '',
-  fields: CollectionFileds.value
+  fields: collectionFields.value
 });
+
+const menuCollections = ref<MenuCollection[]>([]);
 const showAddCollectionDrawer = ref<boolean>(false);
+const selectCollection = defineModel<string>('SelectCollection');
 
-const MenuCollections = ref<MenuCollection[]>([]);
-
-const SelectCollection = defineModel<string>('SelectCollection');
+// 3. 组件加载时初始化集合数据
 onMounted(() => {
-  AxiosInstance.get('/collection')
-    .then((res) => {
-      MenuCollections.value = res.data.data;
-      console.log(MenuCollections.value);
-      message.info('init Get Collections Success');
-    })
-    .catch((err) => {
-      console.log(err);
-      message.error('init Get Collections Failed');
-    });
+  loadCollections();
 });
-// 定义字段选项
-const CollectionFiledOptions = [
-  {
-    label: 'Text',
-    key: 'text'
-  },
-  {
-    label: 'Number',
-    key: 'number'
-  },
-  {
-    label: 'Bool',
-    key: 'bool'
-  }
-];
 
-// 添加字段函数
-const addField = (key: string) => {
-  const field_type = key;
-  CollectionFileds.value.push({ field_name: '', field_type });
+// 加载集合数据的函数
+const loadCollections = async () => {
+  try {
+    const res = await AxiosInstance.get('/collection');
+    menuCollections.value = res.data.data;
+    console.log('Loaded Collections:', menuCollections.value);
+    message.info('Init Get Collections Success');
+  } catch (err) {
+    console.error('Error loading collections:', err);
+    message.error('Init Get Collections Failed');
+  }
 };
 
-// 提交新集合函数
-const submitAddCollection = () => {
-  console.log(newCollection.value);
-  AxiosInstance.post('/collection', newCollection.value)
-    .then((res) => {
-      console.log(res);
-      MenuCollections.value.push(res.data.data);
-      showAddCollectionDrawer.value = false;
-      message.info('Add Collection Success');
-    })
-    .catch((err) => {
-      console.log(err);
-      message.error('Add Collection Failed');
-    });
+// 4. 字段选项定义
+const collectionFieldOptions = [
+  { label: 'Text', key: 'text' },
+  { label: 'Number', key: 'number' },
+  { label: 'Bool', key: 'bool' }
+];
+
+// 5. 添加字段函数
+const addField = (key: string) => {
+  const fieldType = key;
+  collectionFields.value.push({ field_name: '', field_type: fieldType });
+};
+
+// 6. 提交新集合函数
+const submitAddCollection = async () => {
+  try {
+    const res = await AxiosInstance.post('/collection', newCollection.value);
+    menuCollections.value.push(res.data.data);
+    showAddCollectionDrawer.value = false;
+    message.info('Add Collection Success');
+    console.log('New Collection Added:', res.data.data);
+  } catch (err) {
+    console.error('Error adding collection:', err);
+    message.error('Add Collection Failed');
+  }
 };
 </script>
