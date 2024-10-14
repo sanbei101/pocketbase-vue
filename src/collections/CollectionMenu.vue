@@ -28,7 +28,7 @@
     <n-drawer v-model:show="showAddCollectionDrawer" :width="600">
       <n-drawer-content title="Add Collection">
         <n-form @submit.prevent="submitAddCollection">
-          <n-input v-model:value="newCollection.collectionName" placeholder="Collection Name" size="large" />
+          <n-input v-model:value="newCollection.name" placeholder="Collection Name" size="large" />
           <n-divider />
           <div v-for="(field, index) in CollectionFileds" :key="index" style="margin-top: 1rem">
             <n-input v-model:value="field.filed_name" :placeholder="field.filed_type" />
@@ -46,7 +46,7 @@
 
         <div style="display: flex; justify-content: end; gap: 1rem">
           <n-button @click="showAddCollectionDrawer = false"> Cancel </n-button>
-          <n-button> Submit </n-button>
+          <n-button @click="submitAddCollection"> Submit </n-button>
         </div>
       </n-drawer-content>
     </n-drawer>
@@ -54,28 +54,32 @@
 </template>
 
 <script setup lang="ts">
+import AxiosInstance from '@/util/axios';
 import { Cash, AddCircleOutline } from '@vicons/ionicons5';
 
 const props = defineProps<{
   collections: string[];
 }>();
 const emit = defineEmits(['select']);
+
 type collectionFields = {
-  filed_type: string;
   filed_name: string;
+  filed_type: string;
 }[];
+
+const CollectionFileds = ref<collectionFields>([]);
+
 type newCollection = {
-  collectionName: string;
-  collectionFields: collectionFields;
+  name: string;
+  fields: collectionFields;
 };
+
 const newCollection = ref<newCollection>({
-  collectionName: '',
-  collectionFields: []
+  name: '',
+  fields: CollectionFileds.value
 });
 
 const showAddCollectionDrawer = ref<boolean>(false);
-
-const CollectionFileds = ref<collectionFields>([]);
 
 const CollectionFiledOptions = [
   {
@@ -97,7 +101,14 @@ const selectCollection = (collection: string) => {
 };
 
 const submitAddCollection = () => {
-  console.log('submit add collection');
+  console.log(newCollection.value);
+  AxiosInstance.post('/collection', newCollection.value)
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 const addField = (key: string) => {
