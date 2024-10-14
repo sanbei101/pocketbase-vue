@@ -5,7 +5,7 @@
     <n-divider />
 
     <div v-for="collection in menuCollections" :key="collection.id">
-      <n-button strong secondary type="tertiary" style="min-width: 80%" @click="selectCollection = collection.name">
+      <n-button strong secondary type="tertiary" style="min-width: 80%" @click="handleSelectCollection(collection.name, collection.id)">
         <template #icon>
           <n-icon>
             <Cash />
@@ -82,11 +82,33 @@ const newCollection = ref<NewCollection>({
 
 const menuCollections = ref<MenuCollection[]>([]);
 const showAddCollectionDrawer = ref<boolean>(false);
-const selectCollection = defineModel<string>('SelectCollection');
+type selectedCollection = {
+  selectedCollectionName: string;
+  selectedCollectionId: string;
+};
+const selectedCollection = ref<selectedCollection>({
+  selectedCollectionName: '',
+  selectedCollectionId: ''
+});
 
+const emitSelectedCollection = defineEmits<{
+  (event: 'selectedCollection', selectedCollectionName: string, selectedCollectionId: string): void;
+}>();
+
+const handleSelectCollection = (collectionName: string, collectionId: string) => {
+  console.log('Selected Collection:', collectionName, collectionId);
+  selectedCollection.value.selectedCollectionName = collectionName;
+  selectedCollection.value.selectedCollectionId = collectionId;
+  emitSelectedCollection('selectedCollection', collectionName, collectionId);
+};
 // 3. 组件加载时初始化集合数据
-onMounted(() => {
-  loadCollections();
+onMounted(async () => {
+  await loadCollections(); // 等待 loadCollections 执行完成
+  if (menuCollections.value.length > 0) {
+    handleSelectCollection(menuCollections.value[0].name, menuCollections.value[0].id);
+  } else {
+    message.error('menuCollections is empty');
+  }
 });
 
 // 加载集合数据的函数
