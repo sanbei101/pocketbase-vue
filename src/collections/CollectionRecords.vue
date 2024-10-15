@@ -68,10 +68,6 @@ const newRecordField = () => {
     return acc;
   }, {} as NewRecord);
 };
-// 当 columns 变化时，动态初始化 newRecord
-watchEffect(() => {
-  newRecordField();
-});
 
 const handleSubmit = async () => {
   // 1. 提交数据
@@ -138,6 +134,13 @@ watch(
   async () => {
     await prepareColumns();
     await prepareTableRecords();
+  }
+);
+// 当 columns 变化时，动态初始化 newRecord
+watch(
+  () => columns.value,
+  () => {
+    newRecordField();
   }
 );
 </script>
