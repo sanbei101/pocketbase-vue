@@ -15,7 +15,7 @@
 
     <n-space>
       <n-button>Api Priview</n-button>
-      <!-- <n-button color="black" @click="addRecordDrawerAction">New Record</n-button> -->
+      <n-button type="primary" @click="showAddRecordDrawer = true">New Record</n-button>
     </n-space>
   </n-flex>
 
@@ -23,105 +23,121 @@
 
   <n-data-table :columns="columns" :data="records" :row-key="rowKey" :pagination="pagination" max-height="800" />
 
-  <!-- <n-drawer v-model:show="addRecordDrawer" :width="600">
+  <n-drawer v-model:show="showAddRecordDrawer" :width="600">
     <n-drawer-content>
       <h3>添加新记录</h3>
       <n-form @submit.prevent="handleSubmit">
-        <n-form-item label="Name">
-          <n-input v-model:value="newRecord.name" placeholder="输入姓名" />
-        </n-form-item>
-        <n-form-item label="Age">
-          <n-input-number v-model:value="newRecord.age" placeholder="输入年龄" />
-        </n-form-item>
-        <n-form-item label="Address">
-          <n-input v-model:value="newRecord.address" placeholder="输入地址" />
-        </n-form-item>
+        <n-space vertical>
+          <n-form-item v-for="(_, key) in newRecord" :key="key" :label="key">
+            <n-input v-model:value="newRecord[key]" :placeholder="'输入' + key" />
+          </n-form-item>
+        </n-space>
         <n-space>
           <n-button type="primary" @click="handleSubmit">添加</n-button>
-          <n-button @click="addRecordDrawer = false">取消</n-button>
+          <n-button @click="showAddRecordDrawer = false">取消</n-button>
         </n-space>
       </n-form>
     </n-drawer-content>
-  </n-drawer> -->
+  </n-drawer>
 </template>
 
 <script setup lang="ts">
-import { DataTableColumn, NButton } from 'naive-ui';
+import { DataTableColumn } from 'naive-ui';
 import { SettingsOutline as XIconSettings, RocketSharp } from '@vicons/ionicons5';
 import AxiosInstance from '@/util/axios';
+import { type RecordType, type ItemType, type NewRecord, pagination } from '@/util/TableUtil';
 const message = useMessage();
 const props = defineProps<{
   selectedCollectionName: string;
   selectedCollectionId: string;
 }>();
-const pagination = {
-  pageSize: 10
-};
+
+// 新记录的响应式数据
+const newRecord = ref<NewRecord>({});
+const columns = ref<DataTableColumn[]>([]);
+
+const showAddRecordDrawer = ref<boolean>(false);
 const rowKey = (record: RecordType) => record.id;
 
-type RecordType = DataType & {
-  id: string;
+const newRecordField = () => {
+  newRecord.value = columns.value.reduce((acc, column) => {
+    // 确保 column 存在 key 属性后才处理
+    if ('key' in column && column.key) {
+      acc[column.key] = ''; // 默认值为空字符串，或根据需要设置
+    }
+    return acc;
+  }, {} as NewRecord);
 };
-type DataType = {
-  [key: string]: unknown;
-};
-type ItemType = {
-  id: string;
-  data: DataType; // DataType 表示的是嵌套的字段集合
+// 当 columns 变化时，动态初始化 newRecord
+watchEffect(() => {
+  newRecordField();
+});
+
+const handleSubmit = async () => {
+  // 1. 提交数据
+  try {
+    await AxiosInstance.post('/record/add-record', {
+      collection_id: props.selectedCollectionId,
+      data: newRecord.value
+    });
+    newRecordField();
+    prepareTableRecords();
+    showAddRecordDrawer.value = false;
+    message.success('添加数据成功!');
+  } catch (error) {
+    console.error('Error adding record:', error);
+    message.error('添加数据时发生错误');
+  }
 };
 
 const records = ref<RecordType[]>([]);
 
 // 生成 records 的函数
-const prepareTableRecords = () => {
-  AxiosInstance.get('/record/get-record', {
-    params: {
-      collection_id: props.selectedCollectionId
-    }
-  })
-    .then((res) => {
-      if (res.data.success && res.data.data.length > 0) {
-        // 处理返回的数据，将嵌套结构扁平化
-        records.value = res.data.data.map((item: ItemType) => ({
-          id: item.id,
-          ...item.data
-        }));
-      } else {
-        message.error('No data found or request failed');
+const prepareTableRecords = async () => {
+  try {
+    const res = await AxiosInstance.get('/record/get-record', {
+      params: {
+        collection_id: props.selectedCollectionId
       }
-    })
-    .catch((error) => {
-      console.error('Error fetching records:', error);
     });
+    records.value = [];
+    records.value = res.data.data.map((item: ItemType) => ({
+      id: item.id,
+      ...item.data
+    }));
+    message.success('成功获取记录');
+    console.log('Fetched records:', records.value);
+  } catch (error) {
+    message.error('获取记录失败');
+    console.error('Error fetching records:', error);
+  }
 };
 
-const columns = ref<DataTableColumn[]>([]);
 // 生成动态 columns 的函数
-const prepareColumns = () => {
-  AxiosInstance.get('/record/get-record', {
-    params: {
-      collection_id: props.selectedCollectionId
-    }
-  })
-    .then((res) => {
-      if (res.data.success && res.data.data.length > 0) {
-        const firstItem = res.data.data[0].data;
-        columns.value = Object.keys(firstItem).map((key) => ({
-          title: key.charAt(0).toUpperCase() + key.slice(1), // 将首字母大写作为表头
-          key: key
-        }));
+const prepareColumns = async () => {
+  try {
+    const res = await AxiosInstance.get('/collection/collection-field', {
+      params: {
+        collection_id: props.selectedCollectionId
       }
-    })
-    .catch((error) => {
-      console.error('Error fetching data:', error);
     });
+    columns.value = res.data.data.map((field: { field_name: string }) => ({
+      title: field.field_name.toUpperCase(),
+      key: field.field_name
+    }));
+    message.success('成功获取字段');
+    console.log('Fetched columns:', columns.value);
+  } catch (error) {
+    message.error('获取字段失败');
+    console.error('Error fetching columns:', error);
+  }
 };
 
 watch(
   () => props.selectedCollectionId,
-  () => {
-    prepareTableRecords();
-    prepareColumns();
+  async () => {
+    await prepareColumns();
+    await prepareTableRecords();
   }
 );
 </script>

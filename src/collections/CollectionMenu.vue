@@ -56,22 +56,8 @@
 <script setup lang="ts">
 import AxiosInstance from '@/util/axios';
 import { Cash, AddCircleOutline } from '@vicons/ionicons5';
+import { collectionFieldOptions, CollectionField, NewCollection, MenuCollection } from '@/util/TableUtil';
 const message = useMessage();
-
-// 1. 类型定义
-type CollectionField = {
-  field_name: string;
-  field_type: string;
-};
-
-type NewCollection = {
-  name: string;
-  fields: CollectionField[];
-};
-
-type MenuCollection = NewCollection & {
-  id: string;
-};
 
 // 2. 响应式变量定义
 const collectionFields = ref<CollectionField[]>([]);
@@ -101,7 +87,7 @@ const handleSelectCollection = (collectionName: string, collectionId: string) =>
   selectedCollection.value.selectedCollectionId = collectionId;
   emitSelectedCollection('selectedCollection', collectionName, collectionId);
 };
-// 3. 组件加载时初始化集合数据
+
 onMounted(async () => {
   await loadCollections(); // 等待 loadCollections 执行完成
   if (menuCollections.value.length > 0) {
@@ -117,33 +103,24 @@ const loadCollections = async () => {
     const res = await AxiosInstance.get('/collection/all-collection');
     menuCollections.value = res.data.data;
     console.log('Loaded Collections:', menuCollections.value);
-    message.info('Init Get Collections Success');
+    message.success('加载 Collection 成功!');
   } catch (err) {
     console.error('Error loading collections:', err);
     message.error('Init Get Collections Failed');
   }
 };
 
-// 4. 字段选项定义
-const collectionFieldOptions = [
-  { label: 'Text', key: 'text' },
-  { label: 'Number', key: 'number' },
-  { label: 'Bool', key: 'bool' }
-];
-
-// 5. 添加字段函数
 const addField = (key: string) => {
   const fieldType = key;
   collectionFields.value.push({ field_name: '', field_type: fieldType });
 };
 
-// 6. 提交新集合函数
 const submitAddCollection = async () => {
   try {
     const res = await AxiosInstance.post('/collection/add-collection', newCollection.value);
     menuCollections.value.push(res.data.data);
     showAddCollectionDrawer.value = false;
-    message.info('Add Collection Success');
+    message.success('Add Collection Success');
     console.log('New Collection Added:', res.data.data);
   } catch (err) {
     console.error('Error adding collection:', err);
