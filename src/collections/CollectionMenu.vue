@@ -114,7 +114,7 @@ onMounted(async () => {
 // 加载集合数据的函数
 const loadCollections = async () => {
   try {
-    const res = await AxiosInstance.get('/collection');
+    const res = await AxiosInstance.get('/collection/all-collection');
     menuCollections.value = res.data.data;
     console.log('Loaded Collections:', menuCollections.value);
     message.info('Init Get Collections Success');
@@ -140,7 +140,7 @@ const addField = (key: string) => {
 // 6. 提交新集合函数
 const submitAddCollection = async () => {
   try {
-    const res = await AxiosInstance.post('/collection', newCollection.value);
+    const res = await AxiosInstance.post('/collection/add-collection', newCollection.value);
     menuCollections.value.push(res.data.data);
     showAddCollectionDrawer.value = false;
     message.info('Add Collection Success');

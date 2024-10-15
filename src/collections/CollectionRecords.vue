@@ -74,7 +74,7 @@ const records = ref<RecordType[]>([]);
 
 // 生成 records 的函数
 const prepareTableRecords = () => {
-  AxiosInstance.get('/record', {
+  AxiosInstance.get('/record/get-record', {
     params: {
       collection_id: props.selectedCollectionId
     }
@@ -98,7 +98,7 @@ const prepareTableRecords = () => {
 const columns = ref<DataTableColumn[]>([]);
 // 生成动态 columns 的函数
 const prepareColumns = () => {
-  AxiosInstance.get('/record', {
+  AxiosInstance.get('/record/get-record', {
     params: {
       collection_id: props.selectedCollectionId
     }
