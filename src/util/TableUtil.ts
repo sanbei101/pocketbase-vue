@@ -18,7 +18,10 @@ export type MenuCollection = {
   id: string;
   name: string;
 };
-
+export type selectedCollection = {
+  selectedCollectionName: string;
+  selectedCollectionId: string;
+};
 export type DataType = {
   [key: string]: unknown;
 };

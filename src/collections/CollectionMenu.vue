@@ -56,7 +56,13 @@
 <script setup lang="ts">
 import AxiosInstance from '@/util/axios';
 import { Cash, AddCircleOutline } from '@vicons/ionicons5';
-import { collectionFieldOptions, CollectionField, NewCollection, MenuCollection } from '@/util/TableUtil';
+import {
+  collectionFieldOptions,
+  type CollectionField,
+  type NewCollection,
+  type MenuCollection,
+  type selectedCollection
+} from '@/util/TableUtil';
 const message = useMessage();
 
 // 2. 响应式变量定义
@@ -68,10 +74,7 @@ const newCollection = ref<NewCollection>({
 
 const menuCollections = ref<MenuCollection[]>([]);
 const showAddCollectionDrawer = ref<boolean>(false);
-type selectedCollection = {
-  selectedCollectionName: string;
-  selectedCollectionId: string;
-};
+
 const selectedCollection = ref<selectedCollection>({
   selectedCollectionName: '',
   selectedCollectionId: ''
